@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MSHFNet — Synapse Multi-Organ Segmentation Configuration
+# Edit the paths section for your local environment.
+# All other values reproduce the results reported in the paper.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Paths ────────────────────────────────────────────────────────────────────
+# Update these to point to your local Synapse dataset
+train_path: data/Synapse/train_npz
+test_path:  data/Synapse/test_vol_h5
+save_path:  checkpoints/
+
+# ── Model ────────────────────────────────────────────────────────────────────
+num_classes: 9          # background + 8 organs
+shared_dim:  256        # projected channel dimension in FusionModules
+
+# ── Training ─────────────────────────────────────────────────────────────────
+epochs:       60
+batch_size:   16
+num_workers:  4         # set to 0 on Windows or Kaggle if DataLoader hangs
+
+# ── Optimiser (AdamW with layer-wise learning rates) ─────────────────────────
+lr:           1.0e-4    # base LR for FusionModules + Decoder
+encoder_lr:   1.0e-5    # LR for CNN and Swin encoders (0.1 × base)
+min_lr:       1.0e-6    # CosineAnnealingLR lower bound
+weight_decay: 1.0e-4
+
+# ── Loss weights ─────────────────────────────────────────────────────────────
+ce_weight:       0.4    # class-weighted CrossEntropy
+dice_weight:     0.4    # soft Dice
+boundary_weight: 0.2    # BoundaryLoss (targets HD95)
+
+# ── Deep supervision weights [main, ds1, ds2, ds3] ───────────────────────────
+ds_weights: [1.0, 0.4, 0.2, 0.1]
+
+# ── Class weights for CrossEntropy (9 values, index 0 = background) ──────────
+# Inverse-frequency design: small / hard organs get higher weight
+class_weights: [0.5, 1.5, 3.0, 1.2, 1.5, 0.8, 2.0, 1.2, 2.0]
+
+# ── Preprocessing ────────────────────────────────────────────────────────────
+image_size: 224         # spatial resolution fed to the network
+clip_min:  -125.0       # lower HU clip
+clip_max:   275.0       # upper HU clip
+
+# ── Inference / TTA ──────────────────────────────────────────────────────────
+tta_views: 8            # 4 rotations × 2 flips; set to 1 to disable TTA
+
+# ── Checkpointing ────────────────────────────────────────────────────────────
+save_every: 10          # save a full checkpoint every N epochs
+grad_clip:  1.0         # max gradient norm for torch.nn.utils.clip_grad_norm_
