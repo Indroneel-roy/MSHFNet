@@ -187,7 +187,8 @@ python scripts/download_weights.py --backbone swin_base_patch4_window7_224_22k
 **Synapse dataset:**
 
 ```bash
-python train.py \
+python scripts/train.py \
+    --config configs/synapse.yaml \
     --dataset Synapse \
     --root_path data/Synapse/train_npz \
     --num_classes 9 \
@@ -204,7 +205,7 @@ python train.py \
 **ACDC dataset:**
 
 ```bash
-python train.py \
+python scripts/train.py \
     --dataset ACDC \
     --root_path data/ACDC \
     --num_classes 4 \
@@ -219,7 +220,7 @@ python train.py \
 ### 5. Test & Evaluate
 
 ```bash
-python test.py \
+python scripts/test.py \
     --dataset Synapse \
     --root_path data/Synapse/test_vol_h5 \
     --num_classes 9 \
@@ -231,6 +232,15 @@ python test.py \
 
 Output metrics (DSC and HD95 per organ) will be saved to `results/synapse/metrics.csv`.
 
+### 6. Visualize Predictions
+
+```bash
+python scripts/visualize.py \
+    --checkpoint outputs/synapse/best_model.pth \
+    --root_path data/Synapse/test_vol_h5 \
+    --output_dir results/synapse/figures
+```
+
 ---
 
 ## Project Structure
@@ -238,38 +248,29 @@ Output metrics (DSC and HD95 per organ) will be saved to `results/synapse/metric
 ```
 MSHFNet/
 │
-├── data/                        # Dataset directories (not tracked by git)
-│   ├── Synapse/
-│   └── ACDC/
+├── configs/
+│   └── synapse.yaml             # Training config for Synapse dataset
 │
-├── models/
-│   ├── mshfnet.py               # Full MSHFNet model
-│   ├── cafm.py                  # Cross-Attention Fusion Module
-│   ├── encoder_cnn.py           # ResNet-50 CNN encoder
-│   ├── encoder_swin.py          # Swin-Base Transformer encoder
-│   └── decoder.py               # Shared decoder with deep supervision
+├── figures/
+│   ├── Full Diagram.drawio.png  # MSHFNet full architecture diagram
+│   ├── Share Decoder.drawio.png # Shared decoder with deep supervision
+│   ├── fusion.drawio.png        # CAFM schematic
+│   └── comparison_figure1.png   # Qualitative segmentation results
 │
-├── utils/
-│   ├── dataset_synapse.py       # Synapse dataloader
-│   ├── dataset_acdc.py          # ACDC dataloader
-│   ├── losses.py                # Combined CE + Dice loss
-│   ├── metrics.py               # DSC and HD95 computation
-│   └── augmentation.py          # Online augmentation pipeline
+├── mshfnet/
+│   ├── dataset.py               # Synapse & ACDC dataloaders + augmentation
+│   ├── loss.py                  # Combined CE + Dice loss, deep supervision
+│   ├── model.py                 # Full MSHFNet model + CAFM definition
+│   └── utils.py                 # Metrics (DSC, HD95), helper functions
 │
 ├── scripts/
-│   └── download_weights.py      # Backbone weight downloader
+│   ├── train.py                 # Training entry point
+│   ├── test.py                  # Evaluation & inference entry point
+│   └── visualize.py             # Segmentation visualisation & overlay plots
 │
-├── Figure/
-│   ├── image1.png               # MSHFNet architecture diagram
-│   ├── image2.png               # CAFM schematic
-│   ├── image3.png               # Decoder diagram
-│   └── comparison_figure.png    # Qualitative results
-│
-├── train.py                     # Training entry point
-├── test.py                      # Evaluation entry point
-├── requirements.txt             # Python dependencies
 ├── LICENSE
-└── README.md
+├── README.md
+└── requirements.txt             # Python dependencies
 ```
 
 ---
@@ -320,22 +321,7 @@ Averages softmax predictions from original, horizontal flip, and vertical flip b
 | CNN Backbone | ResNet-50 (torchvision, ImageNet) |
 | Transformer Backbone | Swin-Base (timm, ImageNet-22K) |
 
----
 
-## Citation
-
-If you find this work useful for your research, please cite:
-
-```bibtex
-@article{roy2025mshfnet,
-  title     = {MSHFNet: Multi-Scale Hybrid Fusion Network for
-               Precise Multi-Organ Abdominal CT Segmentation},
-  author    = {Roy, Indroneel},
-  journal   = {arXiv preprint},
-  year      = {2025},
-  note      = {United College of Engineering and Research}
-}
-```
 
 ---
 
@@ -344,7 +330,7 @@ If you find this work useful for your research, please cite:
 - The Synapse dataset split and preprocessing protocol follows [TransUNet](https://github.com/Beckschen/TransUNet).
 - Swin-Base backbone weights from [Swin Transformer](https://github.com/microsoft/Swin-Transformer).
 - ResNet-50 backbone from [torchvision](https://pytorch.org/vision/stable/models.html).
-- The author thanks **Mr. Dharmendra Sir**, Head of Department, United College of Engineering and Research, for his constant encouragement and guidance.
+
 
 ---
 
