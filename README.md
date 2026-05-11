@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Institution](https://img.shields.io/badge/Institution-UCER-orange)](https://www.ucer.ac.in/)
 
-**Indroneel Roy** · United College of Engineering and Research
+**Indroneel Roy** 
 
 </div>
 
