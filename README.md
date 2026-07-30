@@ -28,7 +28,7 @@
 
 </div>
 
-*Note: the SOTA claim above refers specifically to the Pancreas result. The Synapse mean DSC (79.73%) is competitive with — and only modestly above — the strongest prior baseline (Swin-UNet, 79.13%), and all results reflect a single training run per method (see Discussion / Limitations in the paper).*
+*Note: the SOTA claim above refers specifically to the Pancreas result. The Synapse mean DSC (79.73%) is competitive with and only modestly above the strongest prior baseline (Swin-UNet, 79.13%), and all results reflect a single training run per method (see Discussion / Limitations in the paper).*
 
 ---
 
