@@ -24,9 +24,11 @@
 | Benchmark | Mean DSC ↑ | Mean HD95 ↓ | Pancreas DSC ↑ |
 |:---:|:---:|:---:|:---:|
 | **Synapse (8 organs)** | **79.73%** | **27.84 mm** | **81.47%** *(SOTA)* |
-| **ACDC (cardiac MRI)** | **93.76%** | **1.03 mm** | — |
+| **ACDC (cardiac MRI)** | **91.18%** | **2.26 mm** | — |
 
 </div>
+
+*Note: the SOTA claim above refers specifically to the Pancreas result. The Synapse mean DSC (79.73%) is competitive with — and only modestly above — the strongest prior baseline (Swin-UNet, 79.13%), and all results reflect a single training run per method (see Discussion / Limitations in the paper).*
 
 ---
 
@@ -92,16 +94,16 @@ Both branches are projected to a shared 256-d space, then cross-attend bidirecti
 | Attention U-Net | 75.57 | 36.97 | 55.92 | 63.91 | 79.20 | 72.71 | 93.56 | 49.37 | 87.19 | 74.95 |
 | TransUNet | 77.48 | 31.69 | 87.23 | 63.13 | 81.87 | 77.02 | 94.08 | 55.86 | 85.08 | 75.62 |
 | Swin-UNet | 79.13 | **21.55** | 85.47 | 66.53 | 83.28 | 79.61 | 94.29 | 56.58 | **90.66** | 76.60 |
-| **MSHFNet (Ours)** | **79.73** | 27.84 | **88.49** | 62.16 | 77.07 | 64.35 | **94.98** | **81.47** | 82.50 | **86.30** |
+| **MSHFNet (Ours)** | **79.73** | 27.84 | **88.49** | 62.16 | 77.07 | 64.35 | **94.98** | **81.47** | 82.50 | **86.82** |
 
 ### ACDC Cardiac Segmentation Benchmark
 
 | Structure | DSC% ↑ | HD95 (mm) ↓ |
 |:---|:---:|:---:|
-| Right Ventricle | 95.77 | 1.00 |
-| Myocardium | 90.17 | 1.00 |
-| Left Ventricle | 95.35 | 1.10 |
-| **Mean** | **93.76** | **1.03** |
+| Right Ventricle | 90.17 | 2.24 |
+| Myocardium | 89.64 | 1.81 |
+| Left Ventricle | 93.73 | 2.73 |
+| **Mean** | **91.18** | **2.26** |
 
 ### Ablation Study
 
@@ -144,7 +146,7 @@ pip install -r requirements.txt
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/IndroneelRoy/MSHFNet.git
+git clone https://github.com/Indroneel-roy/MSHFNet.git
 cd MSHFNet
 ```
 
@@ -259,7 +261,7 @@ MSHFNet/
 │
 ├── mshfnet/
 │   ├── dataset.py               # Synapse & ACDC dataloaders + augmentation
-│   ├── loss.py                  # Combined CE + Dice loss, deep supervision
+│   ├── loss.py                  # Combined CE + Dice + Boundary loss, deep supervision
 │   ├── model.py                 # Full MSHFNet model + CAFM definition
 │   └── utils.py                 # Metrics (DSC, HD95), helper functions
 │
@@ -289,7 +291,7 @@ MSHFNet/
 | Batch size | 16 |
 | Epochs | 70 |
 | Input size | 224×224 |
-| Loss | 0.5 × CE + 0.5 × Dice |
+| Loss | 0.4 × CE + 0.4 × Dice + 0.2 × Boundary |
 | Deep supervision weights | [1.0, 0.4, 0.2, 0.1] |
 
 **Preprocessing:**
@@ -306,7 +308,7 @@ MSHFNet/
 - Random crop-and-zoom ∈ [0.8, 1.0]
 
 **Test-Time Augmentation (TTA):**
-Averages softmax predictions from original, horizontal flip, and vertical flip before argmax.
+Each slice is predicted 8 times using all combinations of 4 rotations (0°, 90°, 180°, 270°) and horizontal flip (original and flipped). Predictions are inverse-transformed and softmax probability maps are averaged before argmax.
 
 ---
 
